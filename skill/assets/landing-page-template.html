@@ -1,0 +1,544 @@
+<!DOCTYPE html>
+<!--
+  TEMPLATE: AegisAI persona-adaptive landing page.
+  The operator personalizes this per run:
+    1. Set the DEFAULT persona to the top segment from Part 1 by changing the
+       last line of the script: setPersona('security') or setPersona('it').
+    2. Copy comes from references/aegisai-voice.md. To retarget a different
+       industry vertical, adjust the hero + problem-card copy in the PERSONAS
+       object; keep every claim to ones in the voice pack.
+    3. The form is a PROTOTYPE: on submit it runs the routing decision client-side
+       (see 05 routing) so you can SEE the Part 1 -> Part 2 handoff. Wiring it to
+       a real CRM + instant-booking is documented in
+       the production next steps (send, hosting, CRM booking).
+  Reasoning: one page, two personas, deep-linked from the emails (?segment=),
+  so the segment created in Part 1 drives the front end. That is the through-line.
+-->
+
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>AegisAI - Stop the phishing your filter never sees</title>
+<meta name="description" content="Agentic AI email security. Autonomous agents stop phishing, BEC, and zero-day attacks across Microsoft 365 and Google Workspace, with up to 90% fewer false positives." />
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#080A0F; --bg2:#0C1018; --panel:#11151F; --panel2:#151B27;
+    --line:rgba(255,255,255,.08); --line2:rgba(255,255,255,.14);
+    --txt:#EAF0F7; --mut:#9AA6B8; --mut2:#6E7A8C;
+    --acc:#34E5B7; --acc2:#4F86FF; --danger:#FF6B6B; --warn:#FFC24B;
+    --glow:0 0 40px rgba(52,229,183,.25);
+    --radius:16px; --maxw:1120px;
+    font-family:'Inter',system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html{scroll-behavior:smooth}
+  body{background:radial-gradient(1200px 600px at 70% -10%,rgba(79,134,255,.12),transparent 60%),radial-gradient(1000px 500px at 10% 10%,rgba(52,229,183,.10),transparent 55%),var(--bg);color:var(--txt);line-height:1.55;-webkit-font-smoothing:antialiased}
+  a{color:inherit;text-decoration:none}
+  .wrap{max-width:var(--maxw);margin:0 auto;padding:0 24px}
+  .mono{font-variant-numeric:tabular-nums}
+  .accent{color:var(--acc)}
+  .grid-bg{position:fixed;inset:0;z-index:0;background-image:linear-gradient(var(--line) 1px,transparent 1px),linear-gradient(90deg,var(--line) 1px,transparent 1px);background-size:56px 56px;mask-image:radial-gradient(900px 500px at 50% 0%,#000 0%,transparent 75%);opacity:.5;pointer-events:none}
+  main,header,footer{position:relative;z-index:1}
+
+  /* NAV */
+  header{position:sticky;top:0;z-index:50;backdrop-filter:blur(12px);background:rgba(8,10,15,.72);border-bottom:1px solid var(--line)}
+  nav{display:flex;align-items:center;justify-content:space-between;height:64px}
+  .logo{display:flex;align-items:center;gap:10px;font-weight:800;letter-spacing:-.02em;font-size:19px}
+  .logo svg{width:26px;height:26px}
+  .navlinks{display:flex;gap:28px;color:var(--mut);font-size:14px;font-weight:500}
+  .navlinks a:hover{color:var(--txt)}
+  .btn{display:inline-flex;align-items:center;gap:8px;border:none;cursor:pointer;font-family:inherit;font-weight:600;font-size:14px;padding:11px 18px;border-radius:10px;transition:.18s;white-space:nowrap}
+  .btn-primary{background:var(--acc);color:#04231C;box-shadow:var(--glow)}
+  .btn-primary:hover{transform:translateY(-1px);filter:brightness(1.06)}
+  .btn-ghost{background:rgba(255,255,255,.05);color:var(--txt);border:1px solid var(--line2)}
+  .btn-ghost:hover{background:rgba(255,255,255,.09)}
+  .btn-lg{padding:15px 26px;font-size:15px;border-radius:12px}
+  @media(max-width:820px){.navlinks{display:none}}
+
+  /* HERO */
+  .hero{padding:74px 0 40px}
+  .pill{display:inline-flex;align-items:center;gap:8px;font-size:12.5px;font-weight:600;color:var(--mut);background:rgba(255,255,255,.04);border:1px solid var(--line2);padding:7px 13px;border-radius:100px}
+  .pill .dot{width:7px;height:7px;border-radius:50%;background:var(--acc);box-shadow:0 0 10px var(--acc)}
+  .hero-grid{display:grid;grid-template-columns:1.05fr .95fr;gap:56px;align-items:center;margin-top:26px}
+  @media(max-width:900px){.hero-grid{grid-template-columns:1fr;gap:36px}}
+  .toggle{display:inline-flex;background:var(--panel);border:1px solid var(--line2);border-radius:12px;padding:4px;gap:4px;margin-bottom:22px}
+  .toggle button{background:transparent;border:none;color:var(--mut);font-family:inherit;font-weight:600;font-size:13.5px;padding:9px 15px;border-radius:9px;cursor:pointer;transition:.15s;display:flex;align-items:center;gap:8px}
+  .toggle button .ti{width:15px;height:15px;opacity:.8}
+  .toggle button.on{background:linear-gradient(180deg,var(--panel2),var(--panel));color:var(--txt);box-shadow:0 1px 0 rgba(255,255,255,.06) inset,0 6px 18px rgba(0,0,0,.35)}
+  .toggle button.on{color:var(--acc)}
+  h1{font-size:clamp(34px,5vw,56px);line-height:1.03;letter-spacing:-.035em;font-weight:850}
+  .sub{color:var(--mut);font-size:18px;margin-top:20px;max-width:37ch}
+  .cta-row{display:flex;gap:12px;margin-top:30px;flex-wrap:wrap}
+  .microcopy{color:var(--mut2);font-size:13px;margin-top:14px;display:flex;align-items:center;gap:8px}
+  .microcopy svg{width:14px;height:14px;color:var(--acc)}
+
+  /* hero visual: agent verdict card */
+  .verdict{background:linear-gradient(180deg,var(--panel2),var(--panel));border:1px solid var(--line2);border-radius:20px;padding:20px;box-shadow:0 30px 80px rgba(0,0,0,.5)}
+  .vhead{display:flex;align-items:center;justify-content:space-between;padding-bottom:14px;border-bottom:1px solid var(--line)}
+  .vhead .t{font-size:13px;color:var(--mut);font-weight:600;display:flex;align-items:center;gap:9px}
+  .agent-dot{width:8px;height:8px;border-radius:50%;background:var(--acc);box-shadow:0 0 12px var(--acc);animation:pulse 1.8s infinite}
+  @keyframes pulse{0%,100%{opacity:1}50%{opacity:.35}}
+  .email-row{display:flex;align-items:flex-start;gap:12px;padding:14px 4px;border-bottom:1px solid var(--line)}
+  .email-row:last-child{border-bottom:none}
+  .tag{font-size:11px;font-weight:700;padding:4px 9px;border-radius:7px;white-space:nowrap;margin-top:2px}
+  .tag.block{background:rgba(255,107,107,.14);color:var(--danger);border:1px solid rgba(255,107,107,.3)}
+  .tag.ok{background:rgba(52,229,183,.12);color:var(--acc);border:1px solid rgba(52,229,183,.3)}
+  .email-meta .f{font-weight:600;font-size:13.5px}
+  .email-meta .s{color:var(--mut);font-size:12.5px;margin-top:2px}
+  .email-meta .r{color:var(--mut2);font-size:11.5px;margin-top:6px;font-style:italic}
+
+  /* trust bar */
+  .trust{padding:26px 0 8px;border-top:1px solid var(--line);border-bottom:1px solid var(--line);margin-top:44px}
+  .trust p{text-align:center;color:var(--mut2);font-size:12px;font-weight:600;letter-spacing:.14em;text-transform:uppercase;margin-bottom:16px}
+  .logos{display:flex;flex-wrap:wrap;gap:14px 40px;justify-content:center;align-items:center;color:var(--mut);font-weight:700;font-size:17px;opacity:.85}
+  .logos span{display:flex;align-items:center;gap:8px}
+
+  /* sections */
+  section{padding:66px 0}
+  .eyebrow{color:var(--acc);font-weight:700;font-size:13px;letter-spacing:.12em;text-transform:uppercase}
+  h2{font-size:clamp(26px,3.4vw,38px);letter-spacing:-.03em;font-weight:800;margin-top:10px;line-height:1.1}
+  .lead{color:var(--mut);font-size:17px;margin-top:14px;max-width:60ch}
+  .center{text-align:center;margin:0 auto}
+
+  /* stats */
+  .stats{display:grid;grid-template-columns:repeat(4,1fr);gap:18px}
+  @media(max-width:760px){.stats{grid-template-columns:repeat(2,1fr)}}
+  .stat{background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);padding:26px 22px;text-align:center}
+  .stat .n{font-size:40px;font-weight:850;letter-spacing:-.03em;background:linear-gradient(180deg,#fff,var(--acc));-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent}
+  .stat .l{color:var(--mut);font-size:13.5px;margin-top:6px}
+
+  /* problem cards */
+  .cards{display:grid;grid-template-columns:repeat(3,1fr);gap:18px;margin-top:38px}
+  @media(max-width:820px){.cards{grid-template-columns:1fr}}
+  .card{background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);padding:26px;transition:.2s}
+  .card:hover{border-color:var(--line2);transform:translateY(-2px)}
+  .card .ic{width:42px;height:42px;border-radius:11px;display:grid;place-items:center;background:rgba(52,229,183,.1);border:1px solid rgba(52,229,183,.22);margin-bottom:16px}
+  .card .ic svg{width:21px;height:21px;color:var(--acc)}
+  .card h3{font-size:17px;font-weight:700;letter-spacing:-.01em}
+  .card p{color:var(--mut);font-size:14.5px;margin-top:9px}
+
+  /* how it works */
+  .steps{display:grid;grid-template-columns:repeat(3,1fr);gap:0;margin-top:40px;border:1px solid var(--line);border-radius:var(--radius);overflow:hidden}
+  @media(max-width:820px){.steps{grid-template-columns:1fr}}
+  .step{padding:30px 26px;border-right:1px solid var(--line);position:relative}
+  .step:last-child{border-right:none}
+  .step .num{font-size:13px;font-weight:800;color:var(--acc);letter-spacing:.1em}
+  .step h3{font-size:18px;margin-top:12px;font-weight:700}
+  .step p{color:var(--mut);font-size:14.5px;margin-top:9px}
+
+  /* comparison */
+  .compare{display:grid;grid-template-columns:1fr 1fr;gap:18px;margin-top:38px}
+  @media(max-width:760px){.compare{grid-template-columns:1fr}}
+  .col{border-radius:var(--radius);padding:28px;border:1px solid var(--line)}
+  .col.bad{background:linear-gradient(180deg,rgba(255,107,107,.05),transparent)}
+  .col.good{background:linear-gradient(180deg,rgba(52,229,183,.07),transparent);border-color:rgba(52,229,183,.25)}
+  .col .h{font-weight:700;font-size:13px;letter-spacing:.1em;text-transform:uppercase;margin-bottom:18px}
+  .col.bad .h{color:var(--danger)} .col.good .h{color:var(--acc)}
+  .li{display:flex;gap:12px;align-items:flex-start;padding:11px 0;color:var(--mut);font-size:14.5px;border-top:1px solid var(--line)}
+  .li:first-of-type{border-top:none}
+  .li svg{width:18px;height:18px;flex-shrink:0;margin-top:2px}
+  .col.good .li{color:var(--txt)}
+
+  /* value grid */
+  .vgrid{display:grid;grid-template-columns:repeat(3,1fr);gap:18px;margin-top:38px}
+  @media(max-width:820px){.vgrid{grid-template-columns:1fr}}
+
+  /* testimonial */
+  .quote{background:linear-gradient(180deg,var(--panel2),var(--panel));border:1px solid var(--line2);border-radius:20px;padding:44px;text-align:center;max-width:820px;margin:40px auto 0}
+  .quote p{font-size:21px;line-height:1.5;letter-spacing:-.01em;font-weight:500}
+  .quote .who{margin-top:22px;color:var(--mut);font-size:14px}
+  .quote .who b{color:var(--txt)}
+
+  /* FORM / CTA */
+  .convert{background:linear-gradient(180deg,var(--bg2),var(--bg));border-top:1px solid var(--line)}
+  .form-grid{display:grid;grid-template-columns:1fr 1fr;gap:52px;align-items:start}
+  @media(max-width:900px){.form-grid{grid-template-columns:1fr;gap:32px}}
+  .checklist{list-style:none;margin-top:26px;display:flex;flex-direction:column;gap:15px}
+  .checklist li{display:flex;gap:12px;color:var(--mut);font-size:15px}
+  .checklist svg{width:20px;height:20px;color:var(--acc);flex-shrink:0}
+  form{background:var(--panel);border:1px solid var(--line2);border-radius:20px;padding:28px;box-shadow:0 30px 80px rgba(0,0,0,.45)}
+  .frow{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+  .field{margin-top:14px;display:flex;flex-direction:column;gap:7px}
+  .field:first-child{margin-top:0}
+  label{font-size:13px;font-weight:600;color:var(--mut)}
+  label .req{color:var(--acc)}
+  input,select{background:var(--bg);border:1px solid var(--line2);color:var(--txt);font-family:inherit;font-size:14.5px;padding:12px 13px;border-radius:10px;width:100%;transition:.15s}
+  input:focus,select:focus{outline:none;border-color:var(--acc);box-shadow:0 0 0 3px rgba(52,229,183,.15)}
+  input::placeholder{color:var(--mut2)}
+  select{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' fill='%239AA6B8' viewBox='0 0 16 16'%3E%3Cpath d='M8 11L3 6h10z'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 13px center}
+  .err{color:var(--danger);font-size:12px;display:none}
+  .field.invalid input,.field.invalid select{border-color:var(--danger)}
+  .field.invalid .err{display:block}
+  .form-foot{color:var(--mut2);font-size:12px;margin-top:16px;text-align:center}
+  button[type=submit]{width:100%;margin-top:18px;justify-content:center}
+
+  /* success + routing readout */
+  .success{display:none;text-align:center;padding:8px}
+  .success .big{width:56px;height:56px;border-radius:50%;background:rgba(52,229,183,.12);border:1px solid rgba(52,229,183,.35);display:grid;place-items:center;margin:0 auto 18px}
+  .success .big svg{width:28px;height:28px;color:var(--acc)}
+  .success h3{font-size:22px;font-weight:800}
+  .success p{color:var(--mut);margin-top:10px;font-size:15px}
+  .readout{margin-top:22px;text-align:left;background:var(--bg);border:1px dashed var(--line2);border-radius:12px;padding:16px 18px;font-size:13px}
+  .readout .rt{font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--mut2);font-weight:700;margin-bottom:12px;display:flex;align-items:center;gap:8px}
+  .rrow{display:flex;justify-content:space-between;gap:12px;padding:7px 0;border-top:1px solid var(--line);color:var(--mut)}
+  .rrow:first-of-type{border-top:none}
+  .rrow b{color:var(--txt);font-weight:600;text-align:right}
+  .rrow .badgeA{color:var(--acc)} .rrow .badgeS{color:var(--acc2)} .rrow .badgeLow{color:var(--warn)}
+
+  footer{border-top:1px solid var(--line);padding:40px 0;color:var(--mut2);font-size:13px}
+  .foot-grid{display:flex;justify-content:space-between;gap:24px;flex-wrap:wrap;align-items:center}
+  .foot-links{display:flex;gap:22px}
+  .disclaimer{margin-top:22px;padding-top:20px;border-top:1px solid var(--line);color:var(--mut2);font-size:11.5px;line-height:1.6;max-width:760px}
+  .badge-soc{display:inline-flex;align-items:center;gap:8px;border:1px solid var(--line2);border-radius:8px;padding:6px 11px;font-size:12px;color:var(--mut)}
+</style>
+</head>
+<body>
+<div class="grid-bg"></div>
+
+<!-- NAV -->
+<header>
+  <div class="wrap">
+    <nav>
+      <div class="logo">
+        <svg viewBox="0 0 24 24" fill="none"><path d="M12 2l8 3v6c0 5-3.5 8.5-8 11-4.5-2.5-8-6-8-11V5l8-3z" fill="url(#g)" stroke="#34E5B7" stroke-width="1.2"/><path d="M8.5 12l2.5 2.5 4.5-5" stroke="#04231C" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/><defs><linearGradient id="g" x1="4" y1="2" x2="20" y2="22"><stop stop-color="#34E5B7"/><stop offset="1" stop-color="#4F86FF"/></linearGradient></defs></svg>
+        AegisAI
+      </div>
+      <div class="navlinks">
+        <a href="#problem">The threat</a>
+        <a href="#how">How it works</a>
+        <a href="#why">Why Aegis</a>
+        <a href="#proof">Proof</a>
+      </div>
+      <a href="#get" class="btn btn-primary">Get your threat report</a>
+    </nav>
+  </div>
+</header>
+
+<main>
+<!-- HERO -->
+<section class="hero">
+  <div class="wrap">
+    <span class="pill"><span class="dot"></span> Series A · $36M led by Battery Ventures, with Accel &amp; Foundation Capital</span>
+    <div class="hero-grid">
+      <div>
+        <div class="toggle" role="tablist" aria-label="Choose your role">
+          <button id="tab-security" class="on" onclick="setPersona('security')" role="tab">
+            <svg class="ti" viewBox="0 0 24 24" fill="none"><path d="M12 3l7 3v5c0 4-3 7-7 9-4-2-7-5-7-9V6l7-3z" stroke="currentColor" stroke-width="1.5"/></svg>
+            Security leader
+          </button>
+          <button id="tab-it" onclick="setPersona('it')" role="tab">
+            <svg class="ti" viewBox="0 0 24 24" fill="none"><rect x="3" y="4" width="18" height="12" rx="2" stroke="currentColor" stroke-width="1.5"/><path d="M8 20h8M12 16v4" stroke="currentColor" stroke-width="1.5"/></svg>
+            IT / Tech leader
+          </button>
+        </div>
+        <h1 id="hero-h1">Stop the phishing and BEC your filter never sees.</h1>
+        <p class="sub" id="hero-sub">AegisAI puts an autonomous AI agent on every inbox that reasons like an analyst, not a rule. Around 22% more attacks caught, up to 90% fewer false positives.</p>
+        <div class="cta-row">
+          <a href="#get" class="btn btn-primary btn-lg">Get your 14-day threat report</a>
+          <a href="#how" class="btn btn-ghost btn-lg">See how it works</a>
+        </div>
+        <div class="microcopy">
+          <svg viewBox="0 0 24 24" fill="none"><path d="M20 6L9 17l-5-5" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          Connect by API, read-only. No MX changes. 5-minute setup.
+        </div>
+      </div>
+
+      <!-- agent verdict card -->
+      <div class="verdict" aria-hidden="true">
+        <div class="vhead"><span class="t"><span class="agent-dot"></span> AegisAI agent · live verdicts</span><span class="t mono">M365</span></div>
+        <div class="email-row">
+          <span class="tag block">BEC</span>
+          <div class="email-meta"><div class="f">"Re: updated wire instructions"</div><div class="s">from ceo@acmе-corp.com (look-alike domain)</div><div class="r">Reasoning: display-name spoof of your CEO, first-time sender, urgency + payment change.</div></div>
+        </div>
+        <div class="email-row">
+          <span class="tag block">Zero-day</span>
+          <div class="email-meta"><div class="f">"Your voicemail is ready"</div><div class="s">QR code, no known-bad URL</div><div class="r">Reasoning: QR resolves to an AiTM credential page. No payload, no signature.</div></div>
+        </div>
+        <div class="email-row">
+          <span class="tag ok">Clean</span>
+          <div class="email-meta"><div class="f">"Q3 board deck for review"</div><div class="s">from known partner</div><div class="r">Reasoning: established sender, consistent behavior. Delivered.</div></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- trust -->
+    <div class="trust">
+      <p>Trusted by security teams who defend at scale</p>
+      <div class="logos">
+        <span>Mesh</span><span>Lokker</span><span>LangChain</span><span>Stelliant</span><span>Spacetil</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- STATS -->
+<section style="padding-top:34px">
+  <div class="wrap">
+    <div class="stats">
+      <div class="stat"><div class="n">&gt;90%</div><div class="l">Fewer false positives</div></div>
+      <div class="stat"><div class="n">22%</div><div class="l">More attacks caught</div></div>
+      <div class="stat"><div class="n">5&nbsp;min</div><div class="l">API deploy, no MX changes</div></div>
+      <div class="stat"><div class="n">24/7</div><div class="l">Always-on AI agents</div></div>
+    </div>
+  </div>
+</section>
+
+<!-- PROBLEM (persona-adaptive) -->
+<section id="problem">
+  <div class="wrap">
+    <span class="eyebrow">The threat</span>
+    <h2 id="prob-h2">Rule-based filters weren't built for AI attacks.</h2>
+    <p class="lead" id="prob-lead">Attackers now generate targeted phishing and BEC at scale. The gateway you already pay for matches rules and known-bad domains, so the new stuff walks right in.</p>
+    <div class="cards" id="prob-cards"><!-- injected --></div>
+  </div>
+</section>
+
+<!-- HOW -->
+<section id="how" style="padding-top:20px">
+  <div class="wrap">
+    <span class="eyebrow">How it works</span>
+    <h2>From connected to protected in an afternoon.</h2>
+    <div class="steps">
+      <div class="step"><div class="num">01</div><h3>Connect by API</h3><p>Authorize AegisAI on your Microsoft 365 or Google Workspace tenant. Read-only, no MX record changes, no mail-flow disruption. Start in monitoring mode.</p></div>
+      <div class="step"><div class="num">02</div><h3>Agents reason on every email</h3><p>Coordinated AI agents evaluate sender behavior, language, and intent, catching BEC, zero-day, AiTM, and payload-less attacks. Every verdict comes with its reasoning.</p></div>
+      <div class="step"><div class="num">03</div><h3>You get the report</h3><p>In 14 days we show you exactly what your current filter let through, with IOCs and recommendations. Flip to enforcement whenever you're ready.</p></div>
+    </div>
+  </div>
+</section>
+
+<!-- COMPARE -->
+<section style="padding-top:20px">
+  <div class="wrap">
+    <span class="eyebrow">Legacy SEG vs. AegisAI</span>
+    <h2>Less to manage. More caught.</h2>
+    <div class="compare">
+      <div class="col bad">
+        <div class="h">Without Aegis</div>
+        <div class="li"><svg viewBox="0 0 24 24" fill="none"><path d="M18 6L6 18M6 6l12 12" stroke="#FF6B6B" stroke-width="2" stroke-linecap="round"/></svg>Static rules and signatures miss zero-day and payload-less attacks</div>
+        <div class="li"><svg viewBox="0 0 24 24" fill="none"><path d="M18 6L6 18M6 6l12 12" stroke="#FF6B6B" stroke-width="2" stroke-linecap="round"/></svg>Constant tuning, suppression lists, and rule upkeep</div>
+        <div class="li"><svg viewBox="0 0 24 24" fill="none"><path d="M18 6L6 18M6 6l12 12" stroke="#FF6B6B" stroke-width="2" stroke-linecap="round"/></svg>False positives bury the SOC in alerts</div>
+        <div class="li"><svg viewBox="0 0 24 24" fill="none"><path d="M18 6L6 18M6 6l12 12" stroke="#FF6B6B" stroke-width="2" stroke-linecap="round"/></svg>MX changes and migration windows to deploy</div>
+      </div>
+      <div class="col good">
+        <div class="h">With Aegis</div>
+        <div class="li"><svg viewBox="0 0 24 24" fill="none"><path d="M20 6L9 17l-5-5" stroke="#34E5B7" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>AI agents adapt in real time to brand-new attack patterns</div>
+        <div class="li"><svg viewBox="0 0 24 24" fill="none"><path d="M20 6L9 17l-5-5" stroke="#34E5B7" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>No rules to write, no tuning, self-learning</div>
+        <div class="li"><svg viewBox="0 0 24 24" fill="none"><path d="M20 6L9 17l-5-5" stroke="#34E5B7" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>Up to 90% fewer false positives, auto-triaged with IOCs</div>
+        <div class="li"><svg viewBox="0 0 24 24" fill="none"><path d="M20 6L9 17l-5-5" stroke="#34E5B7" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>Live in 5 minutes by API. No MX changes, ever</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- WHY / VALUE -->
+<section id="why" style="padding-top:20px">
+  <div class="wrap">
+    <span class="eyebrow">Why Aegis</span>
+    <h2>Precision-built for defenders.</h2>
+    <div class="vgrid">
+      <div class="card"><div class="ic"><svg viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="3" stroke="currentColor" stroke-width="1.6"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3M5 5l2 2M17 17l2 2M19 5l-2 2M7 17l-2 2" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg></div><h3>Agentic detection</h3><p>Orchestrated agents reason like a human analyst, no rules or signatures required.</p></div>
+      <div class="card"><div class="ic"><svg viewBox="0 0 24 24" fill="none"><path d="M13 2L3 14h7l-1 8 10-12h-7l1-8z" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/></svg></div><h3>5-minute API deploy</h3><p>Native Microsoft 365 and Google Workspace integration. No MX changes, no downtime.</p></div>
+      <div class="card"><div class="ic"><svg viewBox="0 0 24 24" fill="none"><circle cx="6" cy="6" r="2.4" stroke="currentColor" stroke-width="1.5"/><circle cx="18" cy="6" r="2.4" stroke="currentColor" stroke-width="1.5"/><circle cx="12" cy="18" r="2.4" stroke="currentColor" stroke-width="1.5"/><path d="M7.5 7.5l3.5 8M16.5 7.5l-3.5 8M8 6h8" stroke="currentColor" stroke-width="1.4"/></svg></div><h3>Multi-agent architecture</h3><p>Agents work independently and together, adapting to new threats in real time.</p></div>
+      <div class="card"><div class="ic"><svg viewBox="0 0 24 24" fill="none"><path d="M3 12h4l3 8 4-16 3 8h4" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></div><h3>90% fewer false positives</h3><p>Cut alert fatigue and manual reviews with precise, explainable detection.</p></div>
+      <div class="card"><div class="ic"><svg viewBox="0 0 24 24" fill="none"><path d="M12 2l7 3v6c0 5-3.5 8.5-7 11-3.5-2.5-7-6-7-11V5l7-3z" stroke="currentColor" stroke-width="1.5"/><circle cx="12" cy="11" r="2.2" stroke="currentColor" stroke-width="1.4"/></svg></div><h3>VIP &amp; role-based visibility</h3><p>See which executives and high-value targets are under attack, with full context.</p></div>
+      <div class="card"><div class="ic"><svg viewBox="0 0 24 24" fill="none"><rect x="3" y="4" width="18" height="14" rx="2" stroke="currentColor" stroke-width="1.5"/><path d="M7 9h10M7 13h6" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg></div><h3>Explainable, no black box</h3><p>Every decision ships with reasoning and IOCs. CISO and compliance-ready dashboards.</p></div>
+    </div>
+  </div>
+</section>
+
+<!-- PROOF -->
+<section id="proof" style="padding-top:20px">
+  <div class="wrap">
+    <div class="quote">
+      <p id="quote-text">"Aegis is the first solution that truly changes the game. They came into Mesh and stopped attackers in their tracks, everything from fuzzing to AI-generated spear phishing and BEC, without my team wasting time managing rules."</p>
+      <div class="who" id="quote-who"><b>Bam Azizi</b> · CEO, Mesh</div>
+    </div>
+  </div>
+</section>
+
+<!-- CONVERT / FORM -->
+<section class="convert" id="get">
+  <div class="wrap">
+    <div class="form-grid">
+      <div>
+        <span class="eyebrow">Your 14-day threat report</span>
+        <h2 id="form-h2">See what your filter is missing.</h2>
+        <p class="lead">Connect AegisAI to your environment for 14 days. Our agents review the mail that already reached your inboxes and report exactly what got through, with the reasoning behind each catch.</p>
+        <ul class="checklist">
+          <li><svg viewBox="0 0 24 24" fill="none"><path d="M20 6L9 17l-5-5" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg> Read-only API connection, no MX changes, no disruption</li>
+          <li><svg viewBox="0 0 24 24" fill="none"><path d="M20 6L9 17l-5-5" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg> A real list of the phishing, BEC, and zero-day that slipped past</li>
+          <li><svg viewBox="0 0 24 24" fill="none"><path d="M20 6L9 17l-5-5" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg> SOC 2 Type II. Your data is never shared with external AI labs</li>
+        </ul>
+      </div>
+
+      <!-- FORM -->
+      <div>
+        <form id="leadform" novalidate onsubmit="return submitLead(event)">
+          <input type="hidden" id="segment" name="segment" value="Security Leader" />
+          <div class="frow">
+            <div class="field"><label>First name <span class="req">*</span></label><input id="first" placeholder="Jordan" /><span class="err">Enter your first name</span></div>
+            <div class="field"><label>Last name <span class="req">*</span></label><input id="last" placeholder="Ellis" /><span class="err">Enter your last name</span></div>
+          </div>
+          <div class="field"><label>Work email <span class="req">*</span></label><input id="email" placeholder="jordan@company.com" /><span class="err">Enter a valid work email</span></div>
+          <div class="frow">
+            <div class="field"><label>Company <span class="req">*</span></label><input id="company" placeholder="Company, Inc." /><span class="err">Enter your company</span></div>
+            <div class="field"><label>Phone</label><input id="phone" placeholder="Optional" /><span class="err"></span></div>
+          </div>
+          <div class="frow">
+            <div class="field"><label>Company size <span class="req">*</span></label>
+              <select id="size"><option value="">Select...</option><option>1-100</option><option>101-500</option><option>501-1,000</option><option>1,001-5,000</option><option>5,001-10,000</option><option>10,001+</option></select><span class="err">Select a size</span></div>
+            <div class="field"><label>Email environment <span class="req">*</span></label>
+              <select id="env"><option value="">Select...</option><option>Microsoft 365</option><option>Google Workspace</option><option>Outlook / Exchange</option><option>Gmail</option><option>Other</option></select><span class="err">Select one</span></div>
+          </div>
+          <div class="field"><label>Your role <span class="req">*</span></label>
+            <select id="role"><option>Security Leader</option><option>IT Leader</option><option>Tech Exec</option><option>Other</option></select><span class="err"></span></div>
+          <button type="submit" class="btn btn-primary btn-lg">Get my threat report</button>
+          <p class="form-foot">Takes 5 minutes to start. No credit card, no MX changes.</p>
+        </form>
+
+        <!-- success + routing readout -->
+        <div class="success" id="success">
+          <div class="big"><svg viewBox="0 0 24 24" fill="none"><path d="M20 6L9 17l-5-5" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+          <h3 id="success-h">You're all set, <span id="s-name">there</span>.</h3>
+          <p id="success-p">Check your inbox for connection steps. A specialist will be in touch shortly to kick off your 14-day threat report.</p>
+          <div class="readout">
+            <div class="rt">Prototype · illustrative routing (full tiering uses the Part 1 fit inputs; see 05-routing)</div>
+            <div class="rrow"><span>Segment</span><b id="r-seg">Security Leader</b></div>
+            <div class="rrow"><span>Fit tier</span><b id="r-fit">Tier A</b></div>
+            <div class="rrow"><span>Intent</span><b>High (demo/report request)</b></div>
+            <div class="rrow"><span>Routed to</span><b id="r-route">Named AE + SDR</b></div>
+            <div class="rrow"><span>First-touch SLA</span><b id="r-sla">5 minutes</b></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+</main>
+
+<footer>
+  <div class="wrap">
+    <div class="foot-grid">
+      <div class="logo" style="font-size:16px"><svg viewBox="0 0 24 24" fill="none" style="width:22px;height:22px"><path d="M12 2l8 3v6c0 5-3.5 8.5-8 11-4.5-2.5-8-6-8-11V5l8-3z" fill="url(#g2)" stroke="#34E5B7" stroke-width="1.2"/><defs><linearGradient id="g2" x1="4" y1="2" x2="20" y2="22"><stop stop-color="#34E5B7"/><stop offset="1" stop-color="#4F86FF"/></linearGradient></defs></svg> AegisAI</div>
+      <div class="foot-links"><a href="#how">How it works</a><a href="#why">Why Aegis</a><a href="#get">Threat report</a></div>
+      <span class="badge-soc">🔒 SOC 2 Type II</span>
+    </div>
+    <p class="disclaimer"><b>Prototype notice:</b> this landing page was built as part of an Operations &amp; Growth take-home to demonstrate a persona-adaptive conversion path. It reuses AegisAI's real public positioning and testimonials for realism and is not an official AegisAI property. The form does not transmit data anywhere; on submit it runs a client-side routing simulation to show the Part 1 to Part 2 handoff.</p>
+  </div>
+</footer>
+
+<script>
+  // ---- Persona content (ties to Part 1 segments) --------------------------
+  const PERSONAS = {
+    security: {
+      tab:'tab-security', seg:'Security Leader',
+      h1:'Stop the phishing and BEC your filter never sees.',
+      sub:'AegisAI puts an autonomous AI agent on every inbox that reasons like an analyst, not a rule. Around 22% more attacks caught, up to 90% fewer false positives.',
+      probH2:"Rule-based filters weren't built for AI attacks.",
+      probLead:'Attackers now generate targeted spear-phishing and BEC at scale. Your gateway matches rules and known-bad domains, so payload-less and AiTM attacks walk right in, and your SOC eats the false positives.',
+      formH2:'See what your filter is missing.',
+      cards:[
+        ['BEC and executive fraud','CEO impersonation, vendor compromise, and wire fraud that pass SPF/DKIM and carry no malicious payload.'],
+        ['Zero-day and AiTM','Adversary-in-the-middle and payload-less phishing with no known-bad URL for a signature to catch.'],
+        ['Alert fatigue','Legacy filters flood the SOC with false positives, so real incidents get lost in the noise.']
+      ],
+      quote:['"Aegis is the first solution that truly changes the game. They came into Mesh and stopped attackers in their tracks, everything from fuzzing to AI-generated spear phishing and BEC, without my team wasting time managing rules."','<b>Bam Azizi</b> · CEO, Mesh']
+    },
+    it: {
+      tab:'tab-it', seg:'IT Leader',
+      h1:'Enterprise-grade email security. Live in 5 minutes.',
+      sub:'Deploy AegisAI through the Microsoft 365 or Google Workspace API. No MX changes, no downtime, no gateway to manage. Up to 90% fewer false positives.',
+      probH2:'Email security should not be a migration project.',
+      probLead:'Legacy gateways mean MX changes, change windows, endless rule tuning, and one more console for your team to babysit, all to still miss the new AI-driven attacks.',
+      formH2:'Protected by this afternoon.',
+      cards:[
+        ['Painful deployments','Traditional SEGs need MX record changes, migration windows, and professional services to stand up.'],
+        ['Operational overhead','Rules, suppression lists, and tuning never end, and every false positive is another ticket for your team.'],
+        ['Tool sprawl','Another console, another vendor, another thing to manage, with no time back for your team.']
+      ],
+      quote:['"Usually with these tools there is a lot of configuration of things like suppression lists. With Aegis it just worked. We immediately saw threats to our accounting, engineering, and executive teams."','<b>Ian Cohen</b> · CEO, Lokker']
+    }
+  };
+
+  function renderCards(list){
+    return list.map(c=>`<div class="card"><div class="ic"><svg viewBox="0 0 24 24" fill="none"><path d="M12 9v4M12 17h.01M10.3 3.9L2.4 18a2 2 0 0 0 1.7 3h15.8a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0z" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></div><h3>${c[0]}</h3><p>${c[1]}</p></div>`).join('');
+  }
+
+  function setPersona(key){
+    const p = PERSONAS[key];
+    document.getElementById('tab-security').classList.toggle('on', key==='security');
+    document.getElementById('tab-it').classList.toggle('on', key==='it');
+    document.getElementById('hero-h1').textContent = p.h1;
+    document.getElementById('hero-sub').textContent = p.sub;
+    document.getElementById('prob-h2').textContent = p.probH2;
+    document.getElementById('prob-lead').textContent = p.probLead;
+    document.getElementById('form-h2').textContent = p.formH2;
+    document.getElementById('prob-cards').innerHTML = renderCards(p.cards);
+    document.getElementById('quote-text').textContent = p.quote[0];
+    document.getElementById('quote-who').innerHTML = p.quote[1];
+    document.getElementById('segment').value = p.seg;
+    // keep the form's role select in sync with the chosen persona
+    const roleSel = document.getElementById('role');
+    if(p.seg==='Security Leader') roleSel.value='Security Leader';
+    if(p.seg==='IT Leader') roleSel.value='IT Leader';
+  }
+
+  // Deep-link support: email sequence links to ?segment=security|it
+  (function(){
+    const q = new URLSearchParams(location.search).get('segment');
+    setPersona(q==='it' ? 'it' : 'security');
+  })();
+
+  // ---- Client-side validation + routing simulation ------------------------
+  function submitLead(e){
+    e.preventDefault();
+    const fields = [['first',v=>v.trim()],['last',v=>v.trim()],
+      ['email',v=>/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(v.trim())],
+      ['company',v=>v.trim()],['size',v=>v],['env',v=>v]];
+    let ok=true;
+    fields.forEach(([id,test])=>{
+      const el=document.getElementById(id); const wrap=el.closest('.field');
+      if(!test(el.value)){wrap.classList.add('invalid');ok=false;}
+      else wrap.classList.remove('invalid');
+    });
+    if(!ok) return false;
+
+    // ---- routing simulation (mirrors 05-routing decision table) ----
+    const size=document.getElementById('size').value;
+    const role=document.getElementById('role').value;
+    const env=document.getElementById('env').value;
+    const enterprise = size==='10,001+';
+    const inBand = ['101-500','501-1,000','1,001-5,000','5,001-10,000'].includes(size);
+    const supported = ['Microsoft 365','Google Workspace'].includes(env);
+    const buyer = ['Security Leader','IT Leader','Tech Exec'].includes(role);
+
+    let seg=role, fit='Tier C', route='Marketing nurture', sla='1 business day', cls='badgeLow';
+    if(!buyer || size==='1-100' || !supported){
+      fit='Low / Nurture'; route='Marketing nurture (not sales-routed)'; sla='Nurture track'; cls='badgeLow';
+    } else if(enterprise){
+      fit='Strategic (enterprise)'; route='Enterprise AE + Sales Engineer'; sla='1 business hour'; cls='badgeS';
+    } else if(inBand){
+      fit='Tier A'; route='Named AE + SDR (round-robin by region)'; sla='5 minutes (business hours)'; cls='badgeA';
+    }
+    // High intent: this is an inbound demo/report request, so a supported-platform
+    // buyer is always at least Tier B even without perfect firmographics.
+    if(buyer && supported && fit==='Tier C'){ fit='Tier B'; route='SDR follow-up'; sla='15 minutes'; cls='badgeA'; }
+
+    document.getElementById('s-name').textContent = document.getElementById('first').value.trim() || 'there';
+    document.getElementById('r-seg').textContent = seg;
+    const rf=document.getElementById('r-fit'); rf.textContent=fit; rf.className=cls;
+    document.getElementById('r-route').textContent = route;
+    document.getElementById('r-sla').textContent = sla;
+
+    document.getElementById('leadform').style.display='none';
+    document.getElementById('success').style.display='block';
+    document.getElementById('success').scrollIntoView({behavior:'smooth',block:'center'});
+    return false;
+  }
+</script>
+</body>
+</html>
